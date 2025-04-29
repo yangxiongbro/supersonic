@@ -20,6 +20,8 @@ public class DbParameterFactory {
         parametersBuilder.put(EngineType.KYUUBI.getName(), new KyuubiParametersBuilder());
         parametersBuilder.put(EngineType.PRESTO.getName(), new PrestoParametersBuilder());
         parametersBuilder.put(EngineType.TRINO.getName(), new TrinoParametersBuilder());
+        parametersBuilder.put(EngineType.TRINO.getName(), new TrinoParametersBuilder());
+        parametersBuilder.put(EngineType.ORACLE.getName(), new OracleParametersBuilder());
         parametersBuilder.put(EngineType.OTHER.getName(), new OtherParametersBuilder());
     }
 

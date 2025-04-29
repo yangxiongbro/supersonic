@@ -137,6 +137,11 @@
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+<!--            <version>21.5.0.0</version>-->
+        </dependency>
     </dependencies>
 
 
