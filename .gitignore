@@ -1,0 +1,7 @@
+/pandas-ai/.myenv
+/pandas-ai/tests
+/pandas-ai/chartdata
+**/target
+.idea
+/supersonic/launchers/standalone/logs
+/logs

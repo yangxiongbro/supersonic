@@ -1,0 +1,108 @@
+[{
+    "name": "order_items",
+    "description": "订单明细记录信息，一个订单有多条明细记录",
+    "columns": [
+      {
+        "name": "item_id",
+        "type": "integer",
+        "alias": "订单明细记录ID",
+        "description": "唯一ID"
+      },
+      {
+        "name": "order_id",
+        "type": "integer",
+        "alias": "订单ID",
+        "description": "订单ID"
+      },
+      {
+        "name": "product_id",
+        "type": "integer",
+        "alias": "产品ID",
+        "description": "产品ID"
+      },
+      {
+        "name": "quantity",
+        "type": "integer",
+        "alias": "购买数量",
+        "description": "购买产品的数量"
+      },
+      {
+        "name": "list_price",
+        "type": "float",
+        "alias": "折扣",
+        "description": "产品单价乘以折扣后的价格，表示本次交易产品单价"
+      },
+      {
+        "name": "create_time",
+        "type": "datetime",
+        "alias": "购买日期",
+        "description": "购买日期"
+      }
+    ]
+  },
+  {
+    "name": "products",
+    "description": "产信息表，记录产品的详细信息",
+    "columns": [
+      {
+        "name": "product_id",
+        "type": "integer",
+        "description": "唯一ID"
+      },
+      {
+        "name": "product_name",
+        "type": "string",
+        "alias": "产品名称",
+        "description": "产品名称"
+      },
+      {
+        "name": "brand_id",
+        "type": "integer",
+        "alias": "品牌ID",
+        "description": "品牌ID"
+      },
+      {
+        "name": "category_id",
+        "type": "integer",
+        "alias": "类别ID",
+        "description": "产品类别ID"
+      },
+      {
+        "name": "list_price",
+        "type": "float",
+        "alias": "产品单价",
+        "description": "产品单价"
+      }
+    ]
+  },
+  {
+    "name": "orders",
+    "description": "订单表，记录客户订单记录，统计订单总数请使用该表",
+    "columns": [
+      {
+        "name": "order_id",
+        "type": "integer",
+        "alias": "订单ID",
+        "description": "唯一ID"
+      },
+      {
+        "name": "order_status",
+        "alias": "单状态",
+        "type": "integer",
+        "description": "订单状态，用以下值表示：1-接单,2-出库 ,3-运送中,4-完成"
+      },
+      {
+        "name": "order_date",
+        "type": "datetime",
+        "alias": "订单日期",
+        "description": "订单日期，表示客户购买下订单的日期"
+      },
+      {
+        "name": "store_id",
+        "type": "integer",
+        "alias": "门店ID",
+        "description": "门店ID"
+      }
+    ]
+  }  
+]

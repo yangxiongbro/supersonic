@@ -1,0 +1,19 @@
+The user once raised the following question:
+
+{{ context.current_question }}
+
+The summary information you provided to the user is as follows:
+
+{{ context.report_explanatory }}
+
+You now have more detailed data. Based on the user's question and the summary information, conduct an in-depth analysis of what the user wants to know, and provide the user with a data analysis report. The data is as follows:
+
+<data>
+{{ context.report_dataframe }}
+</data>
+
+Please output the result in Chinese.
+
+#Note
+- Do not improvise or make assumptions. The analysis results must be derived from the data. 
+- There is no need to repeat the data list; just output the analysis results. 

@@ -1,0 +1,32 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.supersonic.sync_data.cs.mapper.PandasAiAgentMapper">
+
+    <select id="listDateSetAgent" resultType="com.tencent.supersonic.sync_data.common.vo.AgentVO">
+        select
+            id, tool_config, chat_model_config
+        from s2_agent
+        where tool_config like '%"type":"DATASET"%'
+    </select>
+
+    <select id="listChatModelAgentId" resultType="java.lang.Integer">
+        select
+            distinct id
+        from s2_agent
+        where chat_model_config like concat('%"chatModelId":', #{chatModelId},'%')
+    </select>
+
+    <select id="listDataSetIdByTermId" resultType="java.lang.Long">
+        select
+            distinct dat_set.id
+        from s2_data_set dat_set
+        left join s2_term term
+            on dat_set.domain_id = term.domain_id
+        where term.id in
+            <foreach item="termId" collection="termIdList" separator="," open="(" close=")" index="">
+                #{termId}
+            </foreach>
+    </select>
+
+</mapper>

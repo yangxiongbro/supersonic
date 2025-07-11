@@ -1,0 +1,19 @@
+{% if not output_type %}
+type (possible values "string", "number", "dataframe", "plot"),value must be a dict,Examples: 
+{ "type": "string", "value": {"key1":f"The highest salary is {highest_salary"},"key2":f"{staff}has the highest efficiency"}.",... } or { "type": "number", "value": {"key1":"123"} } or { "type": "dataframe", "value": {"key1":pd.DataFrame({...}),"key2":pd.DataFrame({...}),...} } or { "type": "plot", "value": "temp_chart.png" }
+{% elif output_type == "number" %}
+type (must be "number"), value must be a dict,Example: { "type": "number", "value": {"key1":123,"key2":100,...}}
+{% elif output_type == "string" %}
+{ "type": "string", "value": {"key1":f"The highest salary is {highest_salary"},"key2":f"{staff}has the highest efficiency"}.",... }
+{% elif output_type == "dataframe" %}
+type (must be "dataframe"), value must be dict. Example: { "type": "dataframe", "value": {"key1":pd.DataFrame({...}),"key2":pd.DataFrame({...}),...} }
+{% elif output_type == "plot" %}
+type (must be "plot"), value must be dict. Example: { "type": "plot", "value": {"key1""temp_chart1.png","key2""temp_chart1.png",...} }.
+{% endif %}
+Important：
+-The value is a dictionary, its keys should use human-understandable language to explain the values they correspond to, and they must be unique.
+-Must use st.altair_chart from Streamlit for plotting.
+-Must use st.dataframe from Streamlit for displaying DataFrames.
+-Must use st.
+-The value cannot be an array. Here is an incorrect example:
+{ "type": "dataframe", "value": [dataframe1,dataframe2,...] } or { "type": "string", "value": [...] } or { "type": "number", "value": [...] } or { "type": "plot", "value": [...] }

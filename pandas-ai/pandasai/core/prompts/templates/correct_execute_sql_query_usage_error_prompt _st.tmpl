@@ -1,0 +1,19 @@
+{% for df in context.dfs %}{% include 'shared/dataframe.tmpl' with context %}{% endfor %}
+
+The user asked the following question:
+{{context.memory.get_conversation()}}
+
+You generated the following Python code:
+{{code}}
+
+However, it resulted in the following error:
+{{error}}
+
+# Fix the python code above and return the new python code but the code generated should use execute_sql_query function
+# A result array variable must be declared to store each generated code unit dictionary,and it must be the last line of the code, for example:
+
+   result=[code_unit_dict_1, code_unit_dict_2, ...] 
+   
+   Please refer to the #Note section for instructions on how to generate the code_unit_dict.
+
+{% include 'shared/note.tmpl' with context %}

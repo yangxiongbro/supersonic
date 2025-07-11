@@ -1,0 +1,67 @@
+<tables>
+{% for df in context.dfs %}
+{% include 'shared/dataframe.tmpl' with context %}
+{% endfor %}
+</tables>
+
+You are already provided with the following functions that you can call:
+<function>
+def execute_sql_query(sql_query: str) -> pd.Dataframe
+    """This method connects to the database, executes the sql query and returns the dataframe"""
+</function>
+
+{% if last_code_generated != "" and context.memory.count() > 0 %}
+{{ last_code_generated }}
+{% else %}
+Update this initial code:
+```python
+# TODO: import the required dependencies
+    import pandas as pd
+    import streamlit as st
+    import altair as alt
+    from pygwalker.api.streamlit import StreamlitRenderer, init_streamlit_comm
+    init_streamlit_comm()
+# Write code here
+
+# Must Declare result var: {% include 'shared/output_type_template.tmpl' with context %}
+```
+{% endif %}
+{% include 'shared/vectordb_docs.tmpl' with context %}
+{{ context.memory.get_last_message() }}
+
+#Note：Below are the requirements for generating Python code, which must be followed:
+- At the end, must declare "result" variable as a dictionary of type and value.
+- Generate python code and return full updated code,code comments are written in Chinese.
+- Important: When encountering complex problems, it is essential to first break down the problem into steps that involve obtaining simpler datasets. Then, merge and compute each step's data to derive the final result.
+- Important: Do not create database connections and query methods on your own. You must use the execute_sql_query tool for SQL queries.
+- only relevant table for query and do aggregation, sorting, joins and grouby through sql query.
+- When writing your SQL queries, ensure that the field names (column aliases) in the result set are represented using Chinese characters,but you must enclose them in single quotes to avoid errors.
+- When writing SQL statements, using two consecutive percent signs in the date formatting function is incorrect. For example, DATE_FORMAT(date_field, '%%Y-%%m') is wrong. The correct format should use single percent signs, such as '%Y-%m'.
+- Important：Make full use of Streamlit's visualization components to enrich the output results and create a human-readable analysis report. The report should include analytical text, data tables, and charts. Below are some requirements:
+-- Add a sequence number and a title before each data output. The title should explain the business significance of the data and be easy to understand.
+-- Important: You must use the StreamlitRenderer to display DataFrames. The StreamlitRenderer module has already been imported, so there is no need to generate additional import code. Follow these steps to properly display your DataFrame:
+--- Step 1: Define an SQL statement
+
+    sql_query="""
+        select product_name as '产品名称' from product 
+    """
+
+--- Step 2: Obtain a DataFrame
+    First, you need to obtain a DataFrame by executing an SQL query. Here’s an example of how to do this:
+
+    df = execute_sql_query(sql_query)
+
+--- Step 3: Display titles and explanatory text   
+    The title should reflect the business significance of the data, and the explanatory text should make it easy for humans to understand the business context of the data.For example:
+
+    st.markdown('## 1. 每个职员的订单数量统计')
+    st.markdown('以下表格展示了每位员工在不同门店处理的订单数量。')
+
+--- Step 4: Use StreamlitRenderer to Render the Data
+    Once you have obtained the DataFrame, you can use the StreamlitRenderer to render it in your Streamlit application,For example:
+    
+    render = StreamlitRenderer(df, default_tab="data")
+    render.explorer(default_tab="data")
+
+- If the user needs to draw charts, then they must use st.altair_chart from Streamlit to output the charts.
+- Must use st.markdown to display text.

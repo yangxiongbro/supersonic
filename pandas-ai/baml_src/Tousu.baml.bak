@@ -1,0 +1,170 @@
+class SocGraph{
+  task_id string @description(#"
+    案例id，从$task_id获取
+  "#) 
+  // networkEventAndEventSerieTriples NetworkEventAndEventTimeSliceTriple[] @description(#"
+  //   网络事件和事件时间切片的三元组集合，从以下地方抽取：
+  //   1、从$data.outputs.report.results[*].data[*].row[*].通用定界[*]数组抽取多个网络事件实体，每个网络事件.category设置为'通用定界'，
+  //   同时从conclusion抽取事件时间切片实体信息
+  //   2、从$data.outputs.report.results[*].data[*].row[*].失败分析定界[*]抽取多个网络事件实体，每个网络事件.category设置为'失败分析定界',
+  //   同时从conclusion抽取时间切片实体信息
+
+  // "#)
+  // networkEventAndCellTriples NetworkEventAndCellTriple[] @description(#"
+  //   网络事件和事件时间切片的三元组集合，从以下地方抽取：
+  //   1、从$data.outputs.report.results[*].data[*].row[*].通用定界[*]数组抽取多个网络事件实体，每个网络事件.category设置为'通用定界'，
+  //   同时从conclusion抽取事件发生所在小区实体信息
+  //   2、从$data.outputs.report.results[*].data[*].row[*].失败分析定界[*]抽取多个网络事件实体，每个网络事件.category设置为'失败分析定界',
+  //   同时从conclusion抽取事件发生所在小区实体信息
+
+  // "#)  
+  indexAndIndexTimeSliceTriple IndexAndIndexTimeSliceTriple[] @description(#"
+    指标和指标时间切片的三元组集合，从以下地方抽取：
+    1、从$data.outputs.report.results[*].data[*].row[*].指标概览详情[*]数组抽取多个指标实体
+    2、从$data.outputs.report.results[*].data[*].row[*].指标概览详情[*]数组抽取指标时间切片实体
+  "#)    
+}
+
+class NetworkEvent {
+  type string @description(#"
+    设置为event
+  "#)
+  name string @description(#"""
+      从$data.outputs.report.results[*].data[*].row[*]..eventName获取
+  """#) 
+  category string @description(#"""
+      事件大类
+  """#)
+
+
+
+
+}
+
+class EventTimeSlice {
+
+  occurrence_time string @description(#"
+    网络事件发生的时段,从$data.outputs.report.results[*].data[*].row[*]..conclusion查找时间信息，没有找到则设置为空字符串
+  "#) 
+  event_count int  @description(#"
+    事件的发生次数，从$data.outputs.report.results[*].data[*].row[*]..conclusion查找发生次数，如果有多个次数，则进行累计，例如‘4G TCP二三次握手超时 共81次； TOP 3 小区：佛山南海大沥上漖村南新区南二巷DC-KFH-1 46次，佛山南海大沥滘口东区DC-ZFH-2 27次，佛山南海大沥滘口东区DC-ZFH-1 7次；’，这里发生次数累计应该为81+46+7=134次
+  "#) 
+  causeType string   @description(#"
+    事件的发生次数，从$data.outputs.report.results[*].data[*].row[*]..conclusion查找发生次数，如果有多个次数，则进行累计，例如‘4G TCP二三次握手超时 共81次； TOP 3 小区：佛山南海大沥上漖村南新区南二巷DC-KFH-1 46次，佛山南海大沥滘口东区DC-ZFH-2 27次，佛山南海大沥滘口东区DC-ZFH-1 7次；’，这里发生次数累计应该为81+46+7=134次
+  "#) 
+}
+ 
+class NetworkEventAndEventTimeSliceTriple {
+  head NetworkEvent  @description(#"
+    头部节点,设置为网络事件实体
+  "#) 
+  tail EventTimeSlice  @description(#"
+    尾部节点,设置为相关联的事件时间切片实体
+  "#) 
+  relation NetworkEventAndEventTimeSliceRelation @description(#"
+      网络事件和事件时间切片的关系
+  "#) 
+}
+
+class NetworkEventAndEventTimeSliceRelation {
+  name string @description(#"
+    设置值"HAS_TIMELINE"，表示网络事件拥有时间切片
+  "#) 
+}
+class NetworkEventAndCellTriple {
+  head NetworkEvent  @description(#"
+    头部节点,设置为网络事件实体
+  "#) 
+  tail Cell  @description(#"
+    尾部节点,设置为网络事件发生的小区
+  "#) 
+  relation NetworkEventAndCellRelation @description(#"
+      网络事件和小区的关系
+  "#) 
+}
+class Cell {
+  name string @description(#"
+    小区名称，从$data.outputs.report.results[*].data[*].row[*]..conclusion里面抽取，查找'小区：'后面地址类信息，例如：
+       '小区：佛山南海大沥滘口东区DC-ZFH-1 9次，佛山南海大沥滘口东区DC-ZFH-2 5次，佛山南海大沥上漖村南新区南二巷DC-KFH-1 3次；'
+       这里面'佛山南海大沥滘口东区DC-ZFH-1' 和 '佛山南海大沥滘口东区DC-ZFH-2' 和 '佛山南海大沥上漖村南新区南二巷DC-KFH-1'就是小区
+
+  "#)   
+}
+class NetworkEventAndCellRelation {
+  name string @description(#"
+    设置值"HAPPEN_IN"，表示网络事件发生在某个小区
+  "#) 
+}
+
+class IndexAndIndexTimeSliceTriple {
+  head Index  @description(#"
+    头部节点,设置为指标实体
+  "#) 
+  tail IndexTimeSlice  @description(#"
+    尾部节点,设置指标时间切片
+  "#) 
+  relation IndexAndIndexTimeSliceRelation @description(#"
+      指标和指标时间切片的关系
+  "#) 
+}
+class IndexAndIndexTimeSliceRelation {
+  name string @description(#"
+    设置值"HAS_TIMELINE"，表示指标拥有时间切片
+  "#) 
+}
+class Index {
+  type string @description(#"
+    设置为index
+  "#)
+  is_overview int @description(#"
+    如果是从从$data.outputs.report.results[*].data[*].row[*].指标概览详情[*]抽取，则设置为1，否则为0
+  "#)
+  name string @description(#"
+    指标名称，从$data.outputs.report.results[*].data[*].row[*].指标概览详情[*].name里面抽取
+  "#)  
+  unit string @description(#"
+    指标单位，从$data.outputs.report.results[*].data[*].row[*].指标概览详情[*].unit里面抽取
+  "#) 
+  threshold string @description(#"
+    指标阈值，从$data.outputs.report.results[*].data[*].row[*].指标概览详情[*].threshold里面抽取
+  "#)   
+  badOperator string @description(#"
+    比较符，从$data.outputs.report.results[*].data[*].row[*].指标概览详情[*].badOperator里面抽取
+  "#)     
+}
+
+class IndexTimeSlice {
+  value string @description(#"
+    指标值，从$data.outputs.report.results[*].data[*].row[*].指标概览详情[*].value里面抽取
+  "#)
+  network string @description(#"
+    所属网络，从$data.outputs.report.results[*].data[*].row[*].指标概览详情[*].network里面抽取
+  "#)   
+
+
+}
+ 
+
+
+function GenTask(json:string) -> SocGraph { 
+  client Hs_deepseek_v3_250324
+  // client Hs_deepseek_r1
+  client QwenCodeV2_5
+
+  prompt #"    
+    你是一个JSON结构和图数据分析专家，擅长从JSON结构中抽取实体和实体关系信息。
+    我会提供详细的JSON结构给你，你需要仔细分析JSON的结构，按照我要求的输出格式生成一个图数据结构，分析网络事件实体、事件时间切片实体。
+    ###JSON###
+    {{json}}
+    {{ ctx.output_format }}
+  "# 
+}
+
+test TestGenTask {
+  functions [GenTask]
+  args {
+    json #"
+        统计开发人员的缺陷数量并且列出开发人员的详细信息  
+    "#
+  }
+}  

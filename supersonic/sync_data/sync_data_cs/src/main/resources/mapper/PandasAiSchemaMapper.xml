@@ -1,0 +1,94 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.supersonic.sync_data.cs.mapper.PandasAiSchemaMapper">
+
+    <select id="listModel" resultType="com.tencent.supersonic.sync_data.common.vo.ModelVO">
+        select
+            model.id as id,
+            model.name as name,
+            model.biz_name as biz_name,
+            model.domain_id as domain_id,
+            model.database_id as database_id,
+            db.name as database_name,
+            model.description as description,
+            model.model_detail as model_detail
+        from s2_model model
+        left join s2_database db
+            on model.database_id = db.id
+        where
+            model.id in
+            <foreach item="item" collection="modelIdList" separator="," open="(" close=")" index="">
+                #{item}
+            </foreach>
+        order by model.id asc
+    </select>
+
+    <select id="listDimension" resultType="com.tencent.supersonic.sync_data.common.vo.DimensionVO">
+        select
+            model_id,
+            name,
+            expr,
+            biz_name,
+            description
+        from s2_dimension
+        where
+            model_id in
+            <foreach item="item" collection="modelIdList" separator="," open="(" close=")" index="">
+                #{item}
+            </foreach>
+            and status = 1
+        order by id desc
+    </select>
+
+    <select id="listMetric" resultType="com.tencent.supersonic.sync_data.common.vo.MetricVO">
+        select
+            model_id,
+            name,
+            biz_name,
+            type_params,
+            define_type,
+            description
+        from s2_metric
+        where
+            model_id in
+            <foreach item="item" collection="modelIdList" separator="," open="(" close=")" index="">
+                #{item}
+            </foreach>
+            and status = 1
+        order by id desc
+    </select>
+
+    <select id="listModelRela" resultType="com.tencent.supersonic.sync_data.common.vo.ModelRelaVO">
+        select
+            model_rela.from_model_id as model_id,
+            model.biz_name as join_biz_name,
+            model.model_detail as join_model_detail,
+            model_rela.join_condition,
+            'true' as is_from
+        from s2_model_rela model_rela
+        left join s2_model model
+            on model_rela.to_model_id = model.id
+        where
+        from_model_id in
+        <foreach item="item" collection="modelIdList" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+        union all
+         select
+            model_rela.to_model_id as model_id,
+            model.biz_name as join_biz_name,
+            model.model_detail as join_model_detail,
+            model_rela.join_condition,
+            'false' as is_from
+        from s2_model_rela model_rela
+        left join s2_model model
+            on model_rela.from_model_id = model.id
+        where
+            to_model_id in
+            <foreach item="item" collection="modelIdList" separator="," open="(" close=")" index="">
+                #{item}
+            </foreach>
+    </select>
+
+</mapper>

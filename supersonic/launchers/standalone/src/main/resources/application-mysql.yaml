@@ -1,0 +1,24 @@
+spring:
+  datasource:
+#    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${S2_DB_HOST:localhost}:${S2_DB_PORT:3306}/${S2_DB_DATABASE:mysql}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true
+    username: ${S2_DB_USER:root}
+    password: ${S2_DB_PASSWORD:}
+  datasource-trino:
+    driver-class-name: io.trino.jdbc.TrinoDriver
+    url: jdbc:trino://${TRINO_HOST:localhost}:${TRINO_PORT:18080}
+    username: ${TRINO_USER:demo}
+    password: ${TRINO_PASSWORD:}
+
+  sql:
+    init:
+      continue-on-error: true
+#      mode: never
+      mode: always
+      username: ${S2_DB_USER:root}
+      password: ${S2_DB_PASSWORD:}
+      schema-locations: classpath:db/schema-mysql.sql,classpath:db/schema-mysql-demo.sql
+      data-locations: classpath:db/data-mysql.sql,classpath:db/data-mysql-demo.sql
+pandas-ai:
+  url: http://${PANDAS_AI_HOST:localhost}:${PANDAS_AI_PORT:8081}

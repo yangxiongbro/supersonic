@@ -1,0 +1,95 @@
+class IndexCE{
+  task_id string @description(#"
+    案例id，从$task_id获取
+  "#) 
+
+  indexCellTriples IndexCellTriples[] @description(#"
+    指标和指标小区维度的三元组集合，从以下地方抽取：
+    1、从$results[*].data[*].row[*]..用户指标集中性分析[*]的'小区维度*'里面抽取指标实体
+    2、从$results[*].data[*].row[*]..用户指标集中性分析[*]的'小区维度*'抽取多个指标的小区实体
+    3、只提取指标'有集中性'的指标实体
+  "#)    
+}
+
+// class IndexAndIndexTimeSliceTriple {
+class IndexCellTriples {
+  h IndexOfCell  @description(#"
+    头部节点,设置为指标实体
+  "#) 
+  t Cell  @description(#"
+    尾部节点,设置网小区实体
+  "#) 
+  r IndexAndCellRel @description(#"
+      指标和小区的关系
+  "#) 
+  @@stream.done
+}
+
+class IndexOfCell {
+  tp string @description(#"
+    设置为设置i
+  "#)  
+  n string @description(#"
+    指标名称，从$results[*].data[*].row[*]..用户指标集中性分析[*]数组中抽取，并且必须在以'小区维度'开头的数组元素里面抽取，指标名称在'小区维度，指标：'后面，例如以下数组元素：
+    '小区维度，指标：TCP建链平均时延(ms)，无集中性，集中度为0.5000，低于阈值0.5000'
+    这里面'TCP建链平均时延(ms)'中'TCP建链平均时延'就是指标名称,最右边'(ms)'是单位，其他指标也一样，切记不要附加到指标名称后面
+  "#) 
+}
+class Cell {
+  tp string @description(#"
+    节点类型，设置为'c'
+  "#)
+  n string @description(#"
+    小区名称，从$results[*].data[*].row[*]..用户指标集中性分析[*]数组中抽取，并且必须在以'小区维度'开头的数组元素里面抽取，查找'、指标值'前面的小区名称，例如以下数组元素：
+    '小区维度，指标：附着/注册平均时延(ms)，有集中性，集中度为0.8000，高于阈值0.6000\n\t深圳松岗捷创D-ZRH-3、指标值：122.88, 总时延：3932.00, 成功次数：32.00, 影响度：-0.0956'
+    这里面'深圳松岗捷创D-ZRH-3'就是小区
+  "#)  
+  
+}
+
+class IndexAndCellRel {
+  v string @description(#"
+    指标值，$results[*].data[*].row[*]..用户指标集中性分析[*]..小区名称后面的'指标值:'里面抽取，例如：
+    '深圳松岗捷创D-ZRH-3、指标值：122.88, 总时延：3932.00, 成功次数：32.00, 影响度：-0.0956'
+    这里面122.88是指标值，3932.00是指标分子，32.00是指标分母
+  "#)
+  j string @description(#"
+    指标是否有集中性，$results[*].data[*].row[*]..用户指标集中性分析[*]..提取小区维度的指标有无集中性，'有集中性'设置为1，'无集中性'设置为0
+  "#)    
+  z string @description(#"
+    指标分子
+  "#)   
+  m string @description(#"
+    指标分母
+  "#)   
+  n string @description(#"
+    设置值"bt"，表示指标归属某个网元
+  "#) 
+
+}
+ 
+
+
+function GenIndexCE(json:string) -> IndexCE { 
+  client Hs_deepseek_v3_250324
+  // client Hs_deepseek_r1
+  // client QwenCodeV2_5
+
+  prompt #"    
+    你是一个JSON结构和图数据分析专家，擅长从JSON结构中抽取实体和实体关系信息。
+    我会提供详细的JSON结构给你，你需要仔细分析JSON的结构，按照我要求的输出格式生成一个图数据结构。
+    {{IndexList()}}
+    ###JSON###
+    {{json}}
+    {{ ctx.output_format }}
+  "# 
+}
+
+test TestIndexCE {
+  functions [GenIndexCE]
+  args {
+    json #"
+        统计开发人员的缺陷数量并且列出开发人员的详细信息  
+    "#
+  }
+}  

@@ -1,0 +1,135 @@
+#注意：以下是生成 Python 代码的要求，必须遵守：
+- 最后，必须将“result”变量声明为一个列表，用于存储每个生成的代码单元字典，例如：
+
+   result=[code_unit_dict_1, code_unit_dict_2, ...] #非常重要：变量名必须为“result”，并且不应以类似“def”的定义开头，否则会导致错误。
+   
+- 生成 Python 代码并返回完整的更新代码，代码注释用中文编写。
+- 不要生成绘图的python代码。
+- 通过 SQL 获取最终数据，不要通过 Python 代码来计算结果。
+- 当多个图表共享相同的数据时，不要生成多个 SQL 查询；仅查询一次。
+- 重要提示：请勿自行创建数据库连接和查询方法。必须使用 execute_sql_query 工具来进行 SQL 查询。
+- 重要提示：在处理复杂查询时，优先使用 SQL 的 CTE（公用表表达式）来解决问题。
+- 重要提示：在编写 SQL 时，如果表是由视图(View)表示的，要将表名替换为视图的SQL表达式
+- 重要提示：在编写 SQL 时，如果字段是由表达式计算出来的，要将字段替换为表达式
+- 在编写 SQL 时，查询返回的字段不要返回表示主键的ID字段。
+- 在编写 SQL 时，为了中国用户易于理解返回数据列意思，请使用中文别名。
+- 在编写 SQL 时，必须严格遵循数据库方言以生成正确的 SQL 语法，尤其要重点关注所使用的 SQL 函数。
+- 在编写 SQL 时，仅查询相关表，并通过 SQL 查询进行聚合、排序、连接和分组。
+- 在编写 SQL 时，ORDER BY 子句中使用的字段名称应与 SELECT 部分定义的别名保持一致。
+- 在编写 SQL 时，由于在涉及日期处理时，生成 SQL 语句经常会出错，因此必须先彻底研究“# SQL日期处理”部分的内容。
+- 如果用户没有特别说明，处理小数时保留两位小数，例如1.55，如果是百分比或比例，则以 xx.xx% 的格式显示，例如20.12%。
+- 重要提示：获取数据和生成可视化对象的代码必须组织为一个完整的代码单元，一个单元的代码必须集中组织在一起，请参考以下步骤生成一个代码单元：
+-- 步骤1：定义一个字典来保存代码单元的变量
+  该字典用于集中存储代码单元产生的有用变量，它必须是一个全局变量，该字典的名称在全局范围内应具有唯一性，字典的结构如下：
+  code_unit_dict_1={
+    "sql":"<生成数据的SQL>",
+    "sql_explain":"<SQL语句生成背后的逻辑详细说明>",
+    "question":"<以人类能够理解的方式描述用户关于此SQL查询的问题>",
+    "title":"<用人类易于理解的文字概述数据的业务意义作为标题>",
+    "explanatory":"<用人类易于理解的文字详细描述数据的业务意义，一般比title更详细>",
+    "data":<pandas Dataframe 实例>,
+    "draw":<用户是否明确指出要绘图,1-是,0-否>,
+    "analysis_info":<用户分析信息>
+  }
+
+-- 步骤2: 获取一个 DataFrame
+    首先，你需要通过执行SQL查询来获取一个 DataFrame，以下是实现此操作的示例：
+    code_unit_dict_1={}
+    df_1 = execute_sql_query(sql_query)
+    code_unit_dict_1["sql"]=sql_query
+    code_unit_dict_1["sql_explain"]="从员工表进行统计，通过count(员工ID)函数获取员工总数"
+    ...
+    当需要基于df_1进行计算转换的处理时，会得到一个最终的Dataframe
+    ...
+    code_unit_dict_1["data"]=<若中间没有对df_1进行计算转换的处理时设置为df_1，否则为最终的Dataframe>
+    code_unit_dict_1["question"]="统计员工总人数"
+
+-- Step3: 使用表格展示DataFrame数据：
+    分析用户问题是否额外要求生成表格的可视化配置，必须通过学习'# 表格可视化配置'章节内容正确设置config_item_name和config值，以下是代码模板：
+    table_visualization_config1={
+      config_item_name1:config1,
+      config_item_name2:config2,
+      ...
+      ...
+    }
+    code_unit_dict_1["table_visualization_config"]=table_visualization_config1
+
+-- 步骤4：显示标题和解释性文字  
+    标题应反映数据的业务意义，解释性文字应便于人类理解数据的业务背景，例如：
+    title_var_1='每个职员的订单数量统计'
+    explanatory_var_1='以下表格展示了每位员工在不同门店处理的订单数量。'
+    code_unit_dict_1["title"]=title_var_1
+    code_unit_dict_1["explanatory"]=explanatory_var_1
+
+--- Step5: 注意，当用户明确请求绘制图表时才执行此步骤，如果需要绘制图表，请判断用户分析数据的维度,维度必须是SQL查询返回Dataframe的列
+    analysis_info_1={
+      'dimensions':['column1','column2',...],
+      //判断用户分析的指标，指标字段必须是SQL查询返回Dataframe的列
+      'metric':'<column name>',
+      //分析用户希望绘制的图形类别，只能设置以下其中一种：柱状图(bar) or 饼状图(pie) or 环形图(donut) 折线图(line) or 面积图(area) or 玫瑰图(rose) or 散点图(scatte)
+      'user_chart_type':'<bar or pie or donut or line or rose or area or scatte>',
+      //如果用户要求的绘图方式并不适合用户提出的问题，请推荐其他的合适的图表类型，可选择的图表类别：柱状图(bar) or 饼状图(pie) or 环形图(donut) 折线图(line) or 面积图(area) or 玫瑰图(rose) or 散点图(scatte)
+      'recommend_chart_type':'<bar or pie or donut or line or rose or area or scatte>',
+      'recommend_reason':'<推荐原因，使用人类容易能理解的话描述>',
+      //如果用户有要求特殊标记数据项才生成，具体配置参考'# 图表可视化配置章节'
+      'data_item_mark_point':[<如果用户有要求特殊标记数据项才生成，具体配置参考'# 图表可视化配置章节'>,...]
+    }
+    ...
+    ...
+
+    code_unit_dict_1["analysis_info"]=[analysis_info_1,...]
+
+
+
+###学习资料###
+{% if context.config.model_config["terms"] %}
+# 生成SQL前先学习以下术语：
+  {% for term in context.config.model_config["terms"] %}
+    {{ term["name"] }}{% if term["alias"] %}、{{ term["alias"] }}{% endif %}，{{ term["description"] }}
+  {% endfor %}
+{% endif %}
+# SQL日期处理:
+- 当db dialect是trino时：
+-- 在编写 SQL 时，在日期格式化函数中使用两个连续的百分号是错误的。例如，DATE_FORMAT(date_field, '%%Y-%%m') 是错误的。正确的格式应该使用单个百分号，例如 '%Y-%m'
+-- 如果日期字段为字符串格式，那么必须先转换为日期格式：CAST(<日期字段> AS DATE)
+-- 将日期转为'月'时使用strftime(<日期字段>,'%Y-%m')，如果日期字段为字符串，则需要先转换：strftime(CAST(<日期字段> AS DATE),'%Y-%m')
+-- 将日期转为'日'时使用strftime(<日期字段>,'%Y-%m-%d')，如果日期字段为字符串，则需要先转换：strftime(CAST(<日期字段> AS DATE,'%Y-%m-%d'))
+-- 计算昨天(1天前)使用CURRENT_DATE - INTERVAL '1 day'；计算前天(2天前)使用CURRENT_DATE - INTERVAL '2 day'
+-- 计算N天前使用CURRENT_DATE - INTERVAL '<N> day'
+-- 计算N月前使用CURRENT_DATE - INTERVAL '<N> month'
+- 当db dialect是trino时：
+-- 表名前必须要指定catalog和schema
+# 表格可视化配置：
+- 如果多个图表使用同一份dataframe数据，那么只需要生成一次表格
+- 如果用户要求根据数据比较设置某一列表格单元格特殊展示样式，譬如年龄列大于10显示红色，配置项如下：
+  column_style_by_data_compare:{
+    "field_name":<数据字段名称，不能为空>,
+    "comparison_operators":'<比较符,包括大于(>)、小于(<)、等于(==)、最大值(max)、最小值(min)，不能为空>',
+    "comparison_value":<数据字段需要比较的值，当comparison_operators为max或min时设置为空，否则必须设置值>,
+    "color":'<需要设置的颜色值，不能为空>'
+  }
+
+# 图表可视化配置：
+- 如果用户要求特殊标记数据项最大、最小值(例如对于柱状图，要求突出数值最高的柱子为红色等):
+  data_item_mark_point:{
+    /**
+      data是一个数组，用于定义需要标记的点，包括最大值(max)、最小值(min)、平均值(average)3种，根据问题要求可存在一个或多个，譬如同时标记最高点和最低点，标记点的schema如下：
+      {
+        //标记点类型，有最大值(max)、最小值(min)、平均值(average)三种
+        "type": '<max or min or average，不能为空>', 
+        "name":'<最大值 or 最小值 or平均值，不能为空>',
+        //设置标记点的样式，例如颜色、边框等
+        color: '<颜色>',
+        size:<标记大小>,
+        //表示标记的形状
+        "symbol": <pin>
+      } 
+    **/
+    "data":[
+        标记点1,
+        标记点2,
+        ...
+      ]
+  }
+
+  

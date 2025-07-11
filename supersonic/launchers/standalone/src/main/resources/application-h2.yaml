@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:semantic;DATABASE_TO_UPPER=false;QUERY_TIMEOUT=30
+    username: root
+    password: semantic
+  datasource-trino:
+    driver-class-name: io.trino.jdbc.TrinoDriver
+    url: jdbc:trino://${TRINO_HOST:localhost}:${TRINO_PORT:18080}
+    username: ${TRINO_USER:demo}
+    password: ${TRINO_PASSWORD:}
+
+  sql:
+    init:
+      schema-locations: classpath:db/schema-h2.sql,classpath:db/schema-h2-demo.sql
+      data-locations: classpath:db/data-h2.sql,classpath:db/data-h2-demo.sql
+  h2:
+    console:
+      path: /h2-console/semantic
+      enabled: true
+pandas-ai:
+  url: http://${PANDAS_AI_HOST:localhost}:${PANDAS_AI_PORT:8081}

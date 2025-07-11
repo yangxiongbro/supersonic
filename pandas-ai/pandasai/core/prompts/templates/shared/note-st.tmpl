@@ -1,0 +1,63 @@
+#Note：Below are the requirements for generating Python code, which must be followed:
+- {{context.note}}
+- At the end, must declare "result" variable as a list.
+- Generate python code and return full updated code,code comments are written in Chinese.
+- Important: When encountering complex problems, it is essential to first break down the problem into steps that involve obtaining simpler datasets. Then, merge and compute each step's data to derive the final result.
+- Important: Do not create database connections and query methods on your own. You must use the execute_sql_query tool for SQL queries.
+- When writing SQL,only relevant table for query and do aggregation, sorting, joins and grouby through sql query.
+- When writing SQL, if you encounter an ORDER BY clause, do not enclose the fields in single quotes. For example, ORDER BY '年龄' is incorrect.
+- When writing SQL, using two consecutive percent signs in the date formatting function is incorrect. For example, DATE_FORMAT(date_field, '%%Y-%%m') is wrong. The correct format should use single percent signs, such as '%Y-%m'.
+- When writing SQL, the field names used in the ORDER BY clause should be consistent with the aliases defined in the SELECT portion.
+- Important: The code for fetching data and generating visualization objects must be organized as a complete code unit. The code of one unit must be organized together,if there are multiple code units.Refer to the following steps to generate a unit of code:
+-- Step 1: Define a dictionary to hold code unit variables
+  This dict is used to store together all variables that a code unit intends to display,it must be a global variable. The dict should be named uniquely across the global scope. The schema for the dict is as follows:
+  code_unit_dict_1={
+	"sql":"<SQL query to generate data>",
+  "question":"<Describe the user's question regarding this SQL query in a way that humans can understand>",
+	"title":"<The title should reflect the business significance of the data>",
+	"explanatory":"<the explanatory text should make it easy for humans to understand the business context of the data>",
+	"data":<dataframe instance>
+	"chart":<altair chart instance>
+  }
+
+-- Step 2: Obtain a DataFrame
+    First, you need to obtain a DataFrame by executing an SQL query. Here’s an example of how to do this:
+    code_unit_dict_1={}
+    df_1 = execute_sql_query(sql_query)
+    code_unit_dict_1["sql"]=sql_query
+    code_unit_dict_1["data"]=df_1
+    code_unit_dict_1["question"]="统计每个职员的订单数量"
+
+-- Step 3: Display titles and explanatory text  
+    The title should reflect the business significance of the data, and the explanatory text should make it easy for humans to understand the business context of the data.For example:
+    title_var_1='每个职员的订单数量统计'
+    explanatory_var_1='以下表格展示了每位员工在不同门店处理的订单数量。'
+    code_unit_dict_1["title"]=title_var_1
+    code_unit_dict_1["explanatory"]=explanatory_var_1
+
+-- Step 4: If the user requests a chart, then generate one using Altair chart 
+    For example：
+    alt_chart_1 = alt.Chart(df).mark_bar().encode(
+    x='category',
+    y='value'
+    )
+    code_unit_dict_1["chart"]=alt_chart_1
+- If there are multiple code units, each should catch exceptions but avoid rethrowing them to prevent localized errors from halting the entire program. However, if there is only a single code unit, exception catching is unnecessary.For example:
+
+  try:
+    unit_code_1
+  except Exception as e:
+    code_unit_dict_1["question"]="统计每个职员的订单数量"
+    print(f'Error in code_unit_1: {e}')
+  
+  try:
+    unit_code_2
+  except Exception as e:
+    code_unit_dict_2["question"]="统计每个门店的订单数量"
+    print(f'Error in code_unit_2: {e}')  
+  ...
+  ...
+- 
+
+- Do not output any Streamlit code inside the code.
+- If the user does not specify otherwise, when dealing with decimals, retain two decimal places, such as 1.55. If it is a percentage or proportion, display it in the format of xx.xx%, for example, 20.12%.

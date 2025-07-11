@@ -1,0 +1,95 @@
+class IndexYW{
+  task_id string @description(#"
+    案例id，从$task_id获取
+  "#) 
+
+  indexBusinessTriples IndexBusinessTriples[] @description(#"
+    指标和指标业务小类维度的三元组集合，从以下地方抽取：
+    1、从$data.outputs.report.results[*].data[*].row[*]..用户指标集中性分析[*]的'业务小类维度*'里面抽取指标实体
+    2、从$data.outputs.report.results[*].data[*].row[*]..用户指标集中性分析[*]的'业务小类维度*'抽取多个指标的业务小类实体
+    3、只提取指标'有集中性'的指标实体
+  "#)    
+}
+ 
+// class IndexAndIndexTimeSliceTriple {
+class IndexBusinessTriples {
+  h IndexOfBus  @description(#"
+    头部节点,设置为指标实体
+  "#) 
+  t Bus  @description(#"
+    尾部节点,设置指标归属的业务小类
+  "#) 
+  r IndexAndBusRel @description(#"
+      指标和业务小类的关系
+  "#) 
+  @@stream.done
+}
+
+class IndexOfBus {
+  tp string @description(#"
+    设置为设置i
+  "#)  
+  n string @description(#"
+    指标名称，从$data.outputs.report.results[*].data[*].row[*]..用户指标集中性分析[*]数组中抽取，并且必须在以'业务小类维度'开头的数组元素里面抽取，指标名称在'业务小类维度，指标：'后面，例如以下数组元素：
+    '业务小类维度，指标：TCP建链平均时延(ms)，无集中性，集中度为0.5000，低于阈值0.5000'
+    这里面'TCP建链平均时延(ms)'中'TCP建链平均时延'就是指标名称,,最右边'(ms)'是单位，其他指标也一样，切记不要附加到指标名称后面
+  "#) 
+}
+class Bus {
+  tp string @description(#"
+    节点类型，设置为'b'
+  "#)
+  n string @description(#"
+    业务小类，从$data.outputs.report.results[*].data[*].row[*]..用户指标集中性分析[*]数组中抽取，并且必须在以'业务小类维度'开头的数组元素里面抽取，查找'、指标值'前面的网元名称，例如以下数组元素：
+      '业务小类维度，指标：TCP二三次握手平均时延(ms)，有集中性，集中度为0.9574，高于阈值0.6000\n\t苹果iCloud、指标值：129.07, 总时延：1936.09, 成功次数：15.00, 影响度：-0.0362\n\t73001、指标值：140.71, 总时延：5628.27, 成功次数：40.00'
+      这里面'苹果iCloud','73001'就是业务小类名称
+  "#)  
+  
+}
+
+class IndexAndBusRel {
+  v string @description(#"
+    指标值，$$data.outputs.report.results[*].data[*].row[*]..用户指标集中性分析[*]..业务小类维度..指标值里面抽取，例如：
+    '苹果iCloud、指标值：129.07, 总时延：1936.09, 成功次数：15.00, 影响度：-0.0362'
+    这里面129.07是指标值，1936.09是指标分子，15.00是指标分母
+  "#)
+  j string @description(#"
+    指标是否有集中性，$$data.outputs.report.results[*].data[*].row[*]..用户指标集中性分析[*]提取"有集中性"和"无集中性"，有集中性设置为1，无集中性设置为0
+  "#)    
+  z string @description(#"
+    指标分子
+  "#)   
+  m string @description(#"
+    指标分母
+  "#)   
+  n string @description(#"
+    设置值"bt"，表示指标归属某个业务小类
+  "#) 
+
+}
+ 
+
+
+function GenIndexYW(json:string) -> IndexYW { 
+  client Hs_deepseek_v3_250324
+  // client Hs_deepseek_r1
+  // client QwenCodeV2_5
+
+  prompt #"    
+    你是一个JSON结构和图数据分析专家，擅长从JSON结构中抽取实体和实体关系信息。
+    我会提供详细的JSON结构给你，你需要仔细分析JSON的结构，按照我要求的输出格式生成一个图数据结构。
+    {{IndexList()}}
+    ###JSON###
+    {{json}}
+    {{ ctx.output_format }}
+  "# 
+}
+
+test TestIndexYW {
+  functions [GenIndexYW]
+  args {
+    json #"
+        统计开发人员的缺陷数量并且列出开发人员的详细信息  
+    "#
+  }
+}  

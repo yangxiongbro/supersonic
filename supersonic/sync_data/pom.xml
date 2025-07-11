@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>supersonic</artifactId>
+        <groupId>com.tencent.supersonic</groupId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>sync_data</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>sync_data_common</module>
+        <module>sync_data_cs</module>
+        <module>sync_data_rs</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+    </dependencies>
+</project>

@@ -1,0 +1,89 @@
+class EventKS{
+  task_id string @description(#"
+    案例id，从$task_id获取
+  "#) 
+  netEventAndLocationTriple NetEventAndLocationTriple[] @description(#"
+    网络事件和小区/IP/终端实体的三元组集合，从以下地方抽取：
+    1、从$results[*].data[*].row[*]..快速定界[*]抽取多个网络事件实体
+    2、同时从conclusion抽取事件发生所在小区/IP/终端实体信息
+  "#)    
+}
+
+class NetEvent {
+  tp string @description(#"
+    设置为e
+  "#)
+  n string @description(#"""
+      从$data.outputs.report.results[*].data[*].row[*]..快速定界[*].eventName获取
+  """#) 
+
+}
+// 位置
+class Location {
+  tp string @description(#"
+    位置类型，如果抽取的是小区名称，设置为"c"，如果抽取的是IP地址，设置为"i"，如果抽取的是终端信息，设置为"t"
+  "#)
+  n string @description(#"""
+        小区名称，从$results[*].data[*].row[*]..快速定界[*].conclusion里面抽取，查找'小区：'后面地址类信息，例如：
+           '小区：佛山南海大沥滘口东区DC-ZFH-1 9次，佛山南海大沥滘口东区DC-ZFH-2 5次，佛山南海大沥上漖村南新区南二巷DC-KFH-1 3次；'
+           这里面'佛山南海大沥滘口东区DC-ZFH-1' 和 '佛山南海大沥滘口东区DC-ZFH-2' 和 '佛山南海大沥上漖村南新区南二巷DC-KFH-1'就是小区
+        IP地址，从$results[*].data[*].row[*]..conclusion里面抽取，查找'IP：'后面地址类信息，例如：
+           'IP：59.82.17.33 2次，2403:300:A0A:F000:0:0:0:7 3次'
+           这里面'2403:300:A42:C0A:0:0:0:8' 和 '59.82.17.33' 就是IP
+  """#) 
+}
+
+// class NetworkEventAndEventTimeSliceTriple {
+class NetEventAndLocationTriple{
+  h NetEvent  @description(#"
+    头部节点,设置为网络事件实体
+  "#) 
+  t Location  @description(#"
+    尾部节点,设置为网络事件发生的小区/IP/终端
+  "#) 
+  r NetEventAndLocationRel @description(#"
+      网络事件和事件时间切片的关系
+  "#) 
+  @@stream.done
+}
+
+// 事件时间切片
+class NetEventAndLocationRel {
+  tc string @description(#"
+    事件发生的总次数，从$results[*].data[*].row[*]..快速定界[*].conclusion获取
+  "#) 
+  ec int @description(#"
+    事件的发生次数，从$results[*].data[*].row[*]..快速定界[*].conclusion查找发生次数，如果同一个事件同一个小区或同一个事件同一个IP有多个次数，则进行按事件小区、事件IP累计
+  "#) 
+  ct string @description(#"
+    事件原因归类，从$results[*].data[*].row[*]..快速定界[*].causeType
+  "#) 
+  n string  @description(#"
+    设置值"hi"，表示网络事件发生在某个小区/IP
+  "#) 
+}
+
+
+
+function GenEventKS(json:string) -> EventKS { 
+  client Hs_deepseek_v3_250324
+  // client Hs_deepseek_r1
+  // client QwenCodeV2_5
+
+  prompt #"    
+    你是一个JSON结构和图数据分析专家，擅长从JSON结构中抽取实体和实体关系信息。
+    我会提供详细的JSON结构给你，你需要仔细分析JSON的结构，按照我要求的输出格式生成一个图数据结构。
+    ###JSON###
+    {{json}}
+    {{ ctx.output_format }}
+  "# 
+}
+
+test TestGenEventKS {
+  functions [GenEventKS]
+  args {
+    json #"
+        统计开发人员的缺陷数量并且列出开发人员的详细信息  
+    "#
+  }
+}  

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cattle.io/creator: norman
+  name: chatdata-fe
+  namespace: mutil-agent
+spec:
+  ports:
+    - port: 9000
+      protocol: TCP
+      targetPort: 9000
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-mutil-agent-chatdata-fe
+  type: NodePort
